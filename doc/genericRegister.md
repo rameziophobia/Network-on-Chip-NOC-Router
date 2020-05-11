@@ -18,4 +18,4 @@
 
 ## Waveform
 
-![genericRegister_wave.jpg](media\genericRegister_wave.jpg)
+![genericRegister_wave.jpg](media/genericRegister_wave.jpg)
