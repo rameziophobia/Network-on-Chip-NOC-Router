@@ -21,6 +21,13 @@
 
 ## Testbench
 
-| Test case # | addr_a | addr_b | wea | rea | d_out         |
-| :---------: | ------ | ------ | --- | --- | ------------- |
-|      1      | 000    | 000    | 1   | 1   | d_in          |
+| Test case # | addr_a | addr_b | wea | rea | d_out    |
+| :---------: | ------ | ------ | --- | --- | -------- |
+|      1      | 000    | 000    | 1   | 1   | d_in     |
+|      2      | 001    | 000    | 1   | 1   | not d_in |
+|      3      | 000    | 000    | 0   | 1   | not d_in |
+|      4      | 000    | 000    | 1   | 0   | not d_in |
+
+## Waveform
+
+![dualPortRam_wave.jpg](media/dualPortRam_wave.jpg)
