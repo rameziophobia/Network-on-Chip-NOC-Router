@@ -59,6 +59,54 @@ BEGIN
         clk_B <= '0';
         WAIT FOR WAIT_TIME;
 
+        -- Test 2
+        clk_A <= '1';
+        clk_B <= '1';
+
+        d_in <= "00000010";
+        wea <= '1';
+        rea <= '1';
+        addr_a <= 1;
+        addr_b <= 0;
+        WAIT FOR WAIT_TIME;
+        ASSERT d_out /= "00000010"
+        REPORT "ERROR in test 2" SEVERITY error;
+        clk_A <= '0';
+        clk_B <= '0';
+        WAIT FOR WAIT_TIME;
+
+        -- Test 3
+        clk_A <= '1';
+        clk_B <= '1';
+
+        d_in <= "00000011";
+        wea <= '0';
+        rea <= '1';
+        addr_a <= 0;
+        addr_b <= 0;
+        WAIT FOR WAIT_TIME;
+        ASSERT d_out /= "00000011"
+        REPORT "ERROR in test 3" SEVERITY error;
+        clk_A <= '0';
+        clk_B <= '0';
+        WAIT FOR WAIT_TIME;
+
+        -- Test 4
+        clk_A <= '1';
+        clk_B <= '1';
+
+        d_in <= "00000100";
+        wea <= '1';
+        rea <= '0';
+        addr_a <= 0;
+        addr_b <= 0;
+        WAIT FOR WAIT_TIME;
+        ASSERT d_out /= "00000100"
+        REPORT "ERROR in test 4" SEVERITY error;
+        clk_A <= '0';
+        clk_B <= '0';
+        WAIT FOR WAIT_TIME;
+
         WAIT;
     END PROCESS tb;
 
