@@ -1,5 +1,6 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
 
 ENTITY router IS
     GENERIC (N : INTEGER := 7);
@@ -71,6 +72,7 @@ ARCHITECTURE Structural OF router IS
     SIGNAL wr : DATA_TYPE := (wr1, wr2, wr3, wr4);
     SIGNAL input_to_dmux : DATA_TYPE;
     SIGNAL dmux_to_fifo : DATA_TYPE;
+    SIGNAL fifo_to_scheduler : DATA_TYPE;
 
 BEGIN
     GEN_INPUT_BUFFER :
@@ -92,26 +94,26 @@ BEGIN
             d_out2 => dmux_to_fifo(i)(1),
             d_out3 => dmux_to_fifo(i)(2),
             d_out4 => dmux_to_fifo(i)(3),
-            Sel => input_to_dmux(i)(2 DOWNTO 0), -- todo check this
+            Sel => input_to_dmux(i)(1 DOWNTO 0), -- todo check this -- todo typo?
             En => wr(i) -- todo check this
         );
     END GENERATE GEN_DeMux;
 
     GEN_FIFO_OUTER_LOOP :
-    FOR i IN 0 TO 3 GENERATE
+    FOR i IN 0 TO 3 GENERATE -- for each output buffer
         GEN_FIFO_INNER_LOOP :
-        FOR J IN 0 TO 3 GENERATE
-            inputBuffer : genericRegister PORT MAP
+        FOR j IN 0 TO 3 GENERATE -- for each fifo per buffer  
+            inputBuffer : fifo_module PORT MAP
             (
                 rst => rst,
                 rclk => rclock,
                 wclk => wclock,
-                wr_en => wr(j), --wreq
+                wr_en => wr(j) AND (to_integer(signed(input_to_dmux(j)(1 DOWNTO 0))) = i), --wreq
                 wr_data => dmux_to_fifo(j)(i), --datain
-                full => open,
+                full => OPEN,
                 rd_en => '1', -- rreq -- todo check this
                 rd_data => fifo_to_scheduler(i)(j), --dataout
-                empty => open
+                empty => OPEN
             );
         END GENERATE GEN_FIFO_INNER_LOOP;
     END GENERATE GEN_FIFO_OUTER_LOOP;
@@ -128,6 +130,4 @@ BEGIN
             dout => data_out(i)
         );
     END GENERATE GEN_INPUT_BUFFER;
-
-
 END Structural;
