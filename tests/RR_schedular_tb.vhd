@@ -54,31 +54,94 @@ BEGIN
    begin
 
 		--Hold zero input for 40 ns
+		report "start of Zero input duration";
 		wait for clock_period*4;
-		
+		report "end of Zero input duration";
 		--Test 1
 		report "start of Test 1";
 		din1 <= "00000001";
+		wait for clock_period;
+		Assert dout = "00000001"
+			Report "Wrong output in state port1"
+			Severity Error;
 		din2 <= "00000011";
+		wait for clock_period;
+		Assert dout = "00000011"
+			Report "Wrong output in state port2"
+			Severity Error;
 		din3 <= "00000111";
+		wait for clock_period;
+		Assert dout = "00000111"
+			Report "Wrong output in state port3"
+			Severity Error;
 		din4 <= "00001111";
-      wait for clock_period*8;
+      wait for clock_period;
+		Assert dout = "00001111"
+			Report "Wrong output in state port4"
+			Severity Error;
+			
+      wait for clock_period*4;
+		report "end of Test 1";
 		
 		--Test 2
 		report "start of Test 2";
-		din1 <= "00000000";
-		din2 <= "00000000";
+		din4 <= "00000000";
+      wait for clock_period;
+		Assert dout = "00000001"
+			Report "Wrong output in state port4"
+			Severity Error;
 		din3 <= "11111111";
-		din4 <= "11111111";
-      wait for clock_period*8;
+      wait for clock_period;
+		Assert dout = "00000011"
+			Report "Wrong output in state port3"
+			Severity Error;
+		din2 <= "00000000";
+      wait for clock_period;
+		Assert dout = "11111111"
+			Report "Wrong output in state port2"
+			Severity Error;
+		din1 <= "11111111";
+      wait for clock_period;
+		Assert dout = "00000000"
+			Report "Wrong output in state port1"
+			Severity Error;
 		
+      wait for clock_period*4;
+		Assert dout = "00000000"
+			Report "Wrong output in state port4"
+			Severity Error;
+		
+		report "end of Test 2";
 		--Test 3
 		report "start of Test 3";
-		din1 <= "00000000";
-		din2 <= "00000000";
-		din3 <= "00000000";
-		din4 <= "00000000";
-      wait for clock_period*8;
+		din1 <= "11111111";
+      wait for clock_period;
+		Assert dout = "11111111"
+			Report "Wrong output in state port1"
+			Severity Error;
+		din2 <= "11111111";
+      wait for clock_period;
+		Assert dout = "11111111"
+			Report "Wrong output in state port2"
+			Severity Error;
+		din3 <= "11111111";
+      wait for clock_period;
+		Assert dout = "11111111"
+			Report "Wrong output in state port3"
+			Severity Error;
+		din4 <= "11111111";
+      wait for clock_period;
+		Assert dout = "11111111"
+			Report "Wrong output in state port4"
+			Severity Error;
+		
+      wait for clock_period*4;
+		Assert dout = "11111111"
+			Report "Wrong output in state port4"
+			Severity Error;
+		
+		
+		report "end of Test 3";
 		
       wait;
    end process;
