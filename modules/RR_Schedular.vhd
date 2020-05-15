@@ -11,7 +11,7 @@ entity RR_Schedular is
 end RR_Schedular;
 
 architecture behavioral of RR_Schedular is
-	Type state is (Port1, Port2, Port3, Port4);
+	Type state is (start, Port1, Port2, Port3, Port4);
 	signal current_state: state;
 	signal next_state: state;
 begin
@@ -21,9 +21,12 @@ begin
 			current_state <= next_state;
 		end if;
 	end process;
-	rs: process(current_state, din1, din2, din3, din4)
+	rs: process(current_state)
 	begin
 		case current_state is
+			when Port1 =>
+				next_state <= Port2;
+				dout <= din1;
 			when Port2 =>
 				next_state <= Port3;
 				dout <= din2;
@@ -34,8 +37,7 @@ begin
 				next_state <= Port1;
 				dout <= din4;
 			when others =>
-				next_state <= Port2;
-				dout <= din1;
+				next_state <= Port1;
 		end case;
 	end process;
 
