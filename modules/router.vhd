@@ -73,6 +73,8 @@ ARCHITECTURE Structural OF router IS
     SIGNAL input_to_dmux : DATA_TYPE;
     SIGNAL dmux_to_fifo : DATA_TYPE;
     SIGNAL fifo_to_scheduler : DATA_TYPE;
+    SIGNAL fifo_empty : DATA_TYPE;
+    SIGNAL fifo_full : DATA_TYPE;
 
 BEGIN
     GEN_INPUT_BUFFER :
@@ -108,12 +110,12 @@ BEGIN
                 rst => rst,
                 rclk => rclock,
                 wclk => wclock,
-                wr_en => wr(j) AND (to_integer(signed(input_to_dmux(j)(1 DOWNTO 0))) = i), --wreq
+                wr_en => wr(j) AND (to_integer(signed(input_to_dmux(j)(1 DOWNTO 0))) = i) AND NOT fifo_full(i)(j), --wreq
                 wr_data => dmux_to_fifo(j)(i), --datain
-                full => OPEN,
-                rd_en => '1', -- rreq -- todo check this
+                full => fifo_full,
+                rd_en => NOT fifo_empty(i)(j), -- rreq -- todo check this
                 rd_data => fifo_to_scheduler(i)(j), --dataout
-                empty => OPEN
+                empty => fifo_empty
             );
         END GENERATE GEN_FIFO_INNER_LOOP;
     END GENERATE GEN_FIFO_OUTER_LOOP;
