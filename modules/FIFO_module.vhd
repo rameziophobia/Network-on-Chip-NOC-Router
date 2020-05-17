@@ -19,13 +19,13 @@ END module_fifo;
 ARCHITECTURE module_FIFO_Arch OF module_fifo IS
   SIGNAL read_valid_sig : std_logic;
   SIGNAL write_valid_sig : std_logic;
-  signal write_ptr : std_logic_vector (2 downto 0);
-  signal read_ptr : std_logic_vector (2 downto 0);
-	SIGNAL temp_write_ptr_int : Integer;
-	SIGNAL temp_read_ptr_int : Integer;
+  SIGNAL write_ptr : std_logic_vector (2 DOWNTO 0);
+  SIGNAL read_ptr : std_logic_vector (2 DOWNTO 0);
+  SIGNAL temp_write_ptr_int : INTEGER;
+  SIGNAL temp_read_ptr_int : INTEGER;
 BEGIN
 
-fuckface : entity work.FIFOcontrol PORT MAP(
+  fuckface : ENTITY work.FIFOcontrol PORT MAP(
     reset => reset,
     wrclk => wclk,
     rdclk => rclk,
@@ -37,19 +37,19 @@ fuckface : entity work.FIFOcontrol PORT MAP(
     rd_ptr => read_ptr,
     empty => empty,
     full => full
-  );
+    );
 
-temp_write_ptr_int <= to_integer(unsigned(write_ptr));
-temp_read_ptr_int <= to_integer(unsigned(read_ptr));
+  temp_write_ptr_int <= to_integer(unsigned(write_ptr));
+  temp_read_ptr_int <= to_integer(unsigned(read_ptr));
 
-mem : entity work.dualPortRam PORT MAP(
-  d_in => datain,
-  addr_a => temp_write_ptr_int,
-  addr_b => temp_read_ptr_int,
-  clk_A => wclk,
-  clk_B => rclk,
-  wea => write_valid_sig,
-  rea => read_valid_sig,
-  d_out => dataout
-);
+  mem : ENTITY work.dualPortRam PORT MAP(
+    d_in => datain,
+    addr_a => temp_write_ptr_int,
+    addr_b => temp_read_ptr_int,
+    clk_A => wclk,
+    clk_B => rclk,
+    wea => write_valid_sig,
+    rea => read_valid_sig,
+    d_out => dataout
+    );
 END module_FIFO_Arch;

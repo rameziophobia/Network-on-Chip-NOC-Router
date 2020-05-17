@@ -23,12 +23,12 @@ ARCHITECTURE FIFOcontrolarch OF FIFOcontrol IS
   SIGNAL wr_counterToConverter : STD_LOGIC_VECTOR (3 DOWNTO 0);
   SIGNAL rd_binout : STD_LOGIC_VECTOR (3 DOWNTO 0);
   SIGNAL wr_binout : STD_LOGIC_VECTOR (3 DOWNTO 0);
-  Signal read_valid_sig : STD_LOGIC;
-  Signal write_valid_sig : STD_LOGIC; 
+  SIGNAL read_valid_sig : STD_LOGIC;
+  SIGNAL write_valid_sig : STD_LOGIC;
   COMPONENT grayToBinary
-  PORT (
-    gray_in : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-    bin_out : OUT STD_LOGIC_VECTOR (3 DOWNTO 0));
+    PORT (
+      gray_in : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+      bin_out : OUT STD_LOGIC_VECTOR (3 DOWNTO 0));
   END COMPONENT;
 
   COMPONENT grayCounter
@@ -89,24 +89,24 @@ BEGIN
 
     IF reset = '1' THEN
       full <= '0';
-      read_valid_sig <= '0'; 
-    ELSIF ((NOT (wr_counterToConverter(3 downto 2)) = rd_counterToConverter(3 downto 2)) AND (wr_counterToConverter(1 downto 0) = rd_counterToConverter(1 downto 0))) THEN
-    --IF ((to_integer(signed(rd_binout(2:0))) = to_integer(signed(wr_binout(2:0))) + 1)) OR (rd_binout(2:0) = "000" AND wr_binout(2:0) = "111") THEN
+      read_valid_sig <= '0';
+    ELSIF ((NOT (wr_counterToConverter(3 DOWNTO 2)) = rd_counterToConverter(3 DOWNTO 2)) AND (wr_counterToConverter(1 DOWNTO 0) = rd_counterToConverter(1 DOWNTO 0))) THEN
+      --IF ((to_integer(signed(rd_binout(2:0))) = to_integer(signed(wr_binout(2:0))) + 1)) OR (rd_binout(2:0) = "000" AND wr_binout(2:0) = "111") THEN
       full <= '1';
       write_valid_sig <= '0';
     ELSE
       full <= '0';
-      if(w_req = '1') THEN
+      IF (w_req = '1') THEN
         write_valid_sig <= '1';
       ELSE
         write_valid_sig <= '0';
-      end if;
-    end if;
-  end process shelfle7;
+      END IF;
+    END IF;
+  END PROCESS shelfle7;
 
   write_valid <= write_valid_sig;
   read_valid <= read_valid_sig;
-  wr_ptr <= wr_binout(2 downto 0);
-  rd_ptr <= rd_binout(2 downto 0);
+  wr_ptr <= wr_binout(2 DOWNTO 0);
+  rd_ptr <= rd_binout(2 DOWNTO 0);
 
 END FIFOcontrolarch;
