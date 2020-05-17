@@ -21,7 +21,8 @@ ARCHITECTURE module_FIFO_Arch OF module_fifo IS
   SIGNAL write_valid_sig : std_logic;
   signal write_ptr : std_logic_vector (2 downto 0);
   signal read_ptr : std_logic_vector (2 downto 0);
-
+	SIGNAL temp_write_ptr_int : Integer;
+	SIGNAL temp_read_ptr_int : Integer;
 BEGIN
 
 fuckface : entity work.FIFOcontrol PORT MAP(
@@ -37,10 +38,14 @@ fuckface : entity work.FIFOcontrol PORT MAP(
     empty => empty,
     full => full
   );
+
+temp_write_ptr_int <= to_integer(unsigned(write_ptr));
+temp_read_ptr_int <= to_integer(unsigned(read_ptr));
+
 mem : entity work.dualPortRam PORT MAP(
   d_in => datain,
-  addr_a => write_ptr,
-  addr_b => read_ptr,
+  addr_a => temp_write_ptr_int,
+  addr_b => temp_read_ptr_int,
   clk_A => wclk,
   clk_B => rclk,
   wea => write_valid_sig,
