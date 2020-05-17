@@ -14,26 +14,27 @@ ENTITY FIFOcontrol IS
     wr_ptr : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
     rd_ptr : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
     empty : OUT STD_LOGIC;
-    full : OUT STD_LOGIC);
+    full : OUT STD_LOGIC
+  );
 END FIFOcontrol;
 ARCHITECTURE FIFOcontrolarch OF FIFOcontrol IS
   SIGNAL incr : STD_LOGIC_VECTOR (2 DOWNTO 0) := "001";
-  SIGNAL rd_counterToConverter : STD_LOGIC_VECTOR (2 DOWNTO 0);
-  SIGNAL wr_counterToConverter : STD_LOGIC_VECTOR (2 DOWNTO 0);
-  SIGNAL rd_binout : STD_LOGIC_VECTOR (2 DOWNTO 0);
-  SIGNAL wr_binout : STD_LOGIC_VECTOR (2 DOWNTO 0);
+  SIGNAL rd_counterToConverter : STD_LOGIC_VECTOR (3 DOWNTO 0); --there's still work to do here on making the last bit signal to whether the memory is full or empty.
+  SIGNAL wr_counterToConverter : STD_LOGIC_VECTOR (3 DOWNTO 0);
+  SIGNAL rd_binout : STD_LOGIC_VECTOR (3 DOWNTO 0);
+  SIGNAL wr_binout : STD_LOGIC_VECTOR (3 DOWNTO 0);
   Signal read_valid_sig : STD_LOGIC;
   Signal write_valid_sig : STD_LOGIC; 
   COMPONENT grayToBinary
   PORT (
-    gray_in : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-      bin_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0));
+    gray_in : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+    bin_out : OUT STD_LOGIC_VECTOR (3 DOWNTO 0));
   END COMPONENT;
 
   COMPONENT grayCounter
     PORT (
       clk, rst, en : IN STD_LOGIC;
-      count_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0));
+      count_out : OUT STD_LOGIC_VECTOR (3 DOWNTO 0));
   END COMPONENT;
 BEGIN
   gray_cnt_rd : grayCounter PORT MAP(
@@ -82,7 +83,7 @@ BEGIN
       END IF;
     END IF;
 
-    IF ((to_integer(signed(rd_binout)) = to_integer(signed(wr_binout)) + 1)) OR (rd_binout = "000" AND wr_binout = "111") THEN
+    IF ((to_integer(signed(rd_binout)) = to_integer(signed(wr_binout)) + 1)) OR (rd_binout = "0000" AND wr_binout = "1111") THEN
       full <= '1';
     ELSE
       full <= '0';
