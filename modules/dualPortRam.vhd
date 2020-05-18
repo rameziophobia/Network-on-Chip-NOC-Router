@@ -20,14 +20,14 @@ BEGIN
 
     writeProcess : PROCESS (clk_A)
     BEGIN
-        IF rising_edge(clk_A) AND rea = '1' THEN
+        IF rising_edge(clk_A) AND wea = '1' THEN
             mem(addr_a) := d_in;
         END IF;
     END PROCESS writeProcess;
 
     readProcess : PROCESS (clk_B)
     BEGIN
-        IF rising_edge(clk_B) AND wea = '1' THEN
+        IF rising_edge(clk_B) AND rea = '1' THEN
             d_out <= mem(addr_b);
         END IF;
     END PROCESS readProcess;
