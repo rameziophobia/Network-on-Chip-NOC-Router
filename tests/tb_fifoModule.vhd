@@ -51,30 +51,124 @@ BEGIN
     stim_proc : PROCESS
     BEGIN
 
-    reset <= '1';
-    rreq <= '1';
-    WAIT FOR clk_period;
-    ASSERT full = '0' AND empty = '1'
-    REPORT "testing RESET ON failed" SEVERITY ERROR;
-    reset <= '0';
-    wreq <= '1';
-    datain <= "10110101";
-    WAIT FOR clk_period;
-    ASSERT  empty = '0'
-    REPORT "Memory is not empty" SEVERITY ERROR;
+        reset <= '1';
+        rreq <= '1';
+        WAIT FOR clk_period;
+        ASSERT full = '0' AND empty = '1'
+        REPORT "testing RESET ON failed" SEVERITY ERROR;
 
-    wreq <= '0';
-    rreq <= '1';
-    WAIT FOR clk_period;
-    ASSERT dataout = "10110101"
-    REPORT "Reading data unsccessful" SEVERITY ERROR;
+        reset <= '0';
+        wreq <= '1';
+        datain <= "10110101";
+        WAIT FOR clk_period;
+        ASSERT empty = '0'
+        REPORT "Memory is not empty" SEVERITY ERROR;
 
-    -- w_req <= '0';
-    -- r_req <= '1';
-    -- WAIT FOR clk_period;
-    -- ASSERT read_valid = '0' AND empty = '1'
-    -- REPORT "attempting to read when FIFO is empty failed" SEVERITY ERROR;
+        wreq <= '0';
+        rreq <= '1';
+        WAIT FOR clk_period;
+        ASSERT dataout = "10110101"
+        REPORT "Reading data unsccessful" SEVERITY ERROR;
 
+        wreq <= '0';
+        rreq <= '1';
+        WAIT FOR clk_period;
+        ASSERT empty = '1'
+        REPORT "FIFO not empty" SEVERITY ERROR;
+
+        wreq <= '1';
+        rreq <= '0';
+
+        wreq <= '1';
+        datain <= "00000000";
+        WAIT FOR clk_period;
+
+        wreq <= '1';
+        datain <= "00000001";
+        WAIT FOR clk_period;
+
+        wreq <= '1';
+        datain <= "00000010";
+        WAIT FOR clk_period;
+
+        wreq <= '1';
+        datain <= "00000011";
+        WAIT FOR clk_period;
+
+        wreq <= '1';
+        datain <= "00000100";
+        WAIT FOR clk_period;
+
+        wreq <= '1';
+        datain <= "00000101";
+        WAIT FOR clk_period;
+
+        wreq <= '1';
+        datain <= "00000110";
+        WAIT FOR clk_period;
+
+        wreq <= '1';
+        datain <= "00000111";
+        WAIT FOR clk_period;
+
+        ASSERT full = '1'
+        REPORT "FIFO not full" SEVERITY ERROR;
+        
+        rreq <= '1';
+        wreq <= '0';
+        WAIT FOR clk_period;
+
+        ASSERT dataout = "00000000"
+        REPORT "correct read" SEVERITY ERROR;
+        rreq <= '1';
+        wreq <= '0';
+        WAIT FOR clk_period;
+
+        ASSERT dataout = "00000001"
+        REPORT "correct read" SEVERITY ERROR;
+        rreq <= '1';
+        wreq <= '0';
+        WAIT FOR clk_period;
+
+        ASSERT dataout = "00000010"
+        REPORT "correct read" SEVERITY ERROR;
+        rreq <= '1';
+        wreq <= '0';
+        WAIT FOR clk_period;
+
+        ASSERT dataout = "00000011"
+        REPORT "correct read" SEVERITY ERROR;
+        rreq <= '1';
+        wreq <= '0';
+        WAIT FOR clk_period;
+
+        ASSERT dataout = "00000100"
+        REPORT "correct read" SEVERITY ERROR;
+        rreq <= '1';
+        wreq <= '0';
+        WAIT FOR clk_period;
+
+        ASSERT dataout = "00000101"
+        REPORT "correct read" SEVERITY ERROR;
+        rreq <= '1';
+        wreq <= '0';
+        WAIT FOR clk_period;
+
+        ASSERT dataout = "00000110"
+        REPORT "correct read" SEVERITY ERROR;
+        rreq <= '1';
+        wreq <= '0';
+        WAIT FOR clk_period;
+
+        ASSERT dataout = "00000111"
+        REPORT "correct read" SEVERITY ERROR;
+
+        -- w_req <= '0';
+        -- r_req <= '1';
+        -- WAIT FOR clk_period;
+        -- ASSERT read_valid = '0' AND empty = '1'
+        -- REPORT "attempting to read when FIFO is empty failed" SEVERITY ERROR;
+        WAIT;
     END PROCESS;
 
 END;
