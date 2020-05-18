@@ -13,84 +13,35 @@ END router;
 
 ARCHITECTURE Structural OF router IS
 
-    SIGNAL X, Y, S, C : BIT;
-    COMPONENT genericRegister
-        GENERIC (N : INTEGER := 7);
-        PORT (
-            data_in : IN STD_LOGIC_VECTOR (N DOWNTO 0);
-            clk, clk_en, rst : IN STD_LOGIC;
-            data_out : OUT STD_LOGIC_VECTOR (N DOWNTO 0)
-        );
-    END COMPONENT;
-
-    COMPONENT DeMux
-        PORT (
-            d_in : IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-            d_out1 : OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
-            d_out2 : OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
-            d_out3 : OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
-            d_out4 : OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
-            Sel : IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-            En : IN STD_LOGIC
-        );
-    END COMPONENT;
-
-    COMPONENT fifo_module
-        GENERIC (
-            g_WIDTH : NATURAL := 8;
-            g_DEPTH : INTEGER := 16
-        );
-        PORT (
-            rst : IN std_logic;
-            rclk : IN std_logic;
-            wclk : IN std_logic;
-            wr_en : IN std_logic; --wreq
-            wr_data : IN std_logic_vector(g_WIDTH - 1 DOWNTO 0); --datain
-            full : OUT std_logic;
-            rd_en : IN std_logic; -- rreq
-            rd_data : OUT std_logic_vector(g_WIDTH - 1 DOWNTO 0); --dataout
-            empty : OUT std_logic
-        );
-    END COMPONENT;
-
-    COMPONENT RR_Schedular IS
-        PORT (
-            clock : IN STD_LOGIC;
-            din1 : IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-            din2 : IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-            din3 : IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-            din4 : IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-            dout : OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
-        );
-    END COMPONENT;
-
-    TYPE DATA_TYPE IS ARRAY (0 TO 3) OF STD_LOGIC_VECTOR (7 DOWNTO 0);
+    TYPE ARRAY4x8 IS ARRAY (0 TO 3) OF STD_LOGIC_VECTOR (7 DOWNTO 0);
+    TYPE ARRAY4x4x8 IS ARRAY (0 TO 3) OF ARRAY4x8;
+    TYPE ARRAY4x4 IS ARRAY (0 TO 3) OF STD_LOGIC_VECTOR (0 TO 3);
     TYPE dmux_out_type IS ARRAY (0 TO 31) OF STD_LOGIC_VECTOR (7 DOWNTO 0);
 
-    SIGNAL data_in : DATA_TYPE := (datai1, datai2, datai3, datai4);
-    SIGNAL data_out : DATA_TYPE := (datao1, datao2, datao3, datao4);
-    SIGNAL wr : DATA_TYPE := (wr1, wr2, wr3, wr4);
-    SIGNAL input_to_dmux : DATA_TYPE;
-    SIGNAL dmux_to_fifo : DATA_TYPE;
-    SIGNAL fifo_to_scheduler : DATA_TYPE;
-    SIGNAL fifo_empty : DATA_TYPE;
-    SIGNAL fifo_full : DATA_TYPE;
+    SIGNAL data_in : ARRAY4x8;
+    SIGNAL data_out : ARRAY4x8;
+    SIGNAL wr : STD_LOGIC_VECTOR (0 TO 3);
+    SIGNAL input_to_dmux : ARRAY4x8;
+    SIGNAL dmux_to_fifo : ARRAY4x4x8;
+    SIGNAL fifo_to_scheduler : ARRAY4x4x8;
+    SIGNAL fifo_empty : ARRAY4x4;
+    SIGNAL fifo_full : ARRAY4x4;
 
 BEGIN
     GEN_INPUT_BUFFER :
     FOR i IN 0 TO 3 GENERATE
-        inputBuffer : genericRegister PORT MAP
-        (
+        inputBuffer : ENTITY work.genericRegister PORT MAP
+            (
             data_in => data_in(i),
             clk => wclock, clk_en => wr(i),
             rst => rst, data_out => input_to_dmux(i)
-        );
+            );
     END GENERATE GEN_INPUT_BUFFER;
 
     GEN_DeMux :
     FOR i IN 0 TO 3 GENERATE
-        demux : DeMux PORT MAP
-        (
+        demux : ENTITY work.demux PORT MAP
+            (
             d_in => input_to_dmux(i),
             d_out1 => dmux_to_fifo(i)(0),
             d_out2 => dmux_to_fifo(i)(1),
@@ -98,38 +49,51 @@ BEGIN
             d_out4 => dmux_to_fifo(i)(3),
             Sel => input_to_dmux(i)(1 DOWNTO 0), -- todo check this -- todo typo?
             En => wr(i) -- todo check this
-        );
+            );
     END GENERATE GEN_DeMux;
 
     GEN_FIFO_OUTER_LOOP :
     FOR i IN 0 TO 3 GENERATE -- for each output buffer
         GEN_FIFO_INNER_LOOP :
         FOR j IN 0 TO 3 GENERATE -- for each fifo per buffer  
-            inputBuffer : fifo_module PORT MAP
-            (
+            SIGNAL equal : STD_LOGIC;
+            SIGNAL wr_en : STD_LOGIC;
+        BEGIN
+            equal <= '1' WHEN (to_integer(signed(input_to_dmux(j)(1 DOWNTO 0))) = i) ELSE
+                '0';
+            wr_en <= wr(j) AND equal AND NOT fifo_full(i)(j);
+            inputBuffer : ENTITY work.fifo_module PORT MAP
+                (
                 rst => rst,
                 rclk => rclock,
                 wclk => wclock,
-                wr_en => wr(j) AND (to_integer(signed(input_to_dmux(j)(1 DOWNTO 0))) = i) AND NOT fifo_full(i)(j), --wreq
+                wr_en => wr_en, --wreq
                 wr_data => dmux_to_fifo(j)(i), --datain
-                full => fifo_full,
-                rd_en => NOT fifo_empty(i)(j), -- rreq -- todo check this
+                full => fifo_full(i)(j),
+                rd_en => "NOT"(fifo_empty(i)(j)), -- rreq -- todo check this
                 rd_data => fifo_to_scheduler(i)(j), --dataout
-                empty => fifo_empty
-            );
+                empty => fifo_empty(i)(j)
+                );
         END GENERATE GEN_FIFO_INNER_LOOP;
     END GENERATE GEN_FIFO_OUTER_LOOP;
 
     GEN_RR_SCHEDULER :
     FOR i IN 0 TO 3 GENERATE
-        scheduler : RR_Schedular PORT MAP
-        (
+        scheduler : ENTITY work.RR_Schedular PORT MAP
+            (
             clock => rclock,
             din1 => fifo_to_scheduler(i)(0),
             din2 => fifo_to_scheduler(i)(1),
             din3 => fifo_to_scheduler(i)(2),
             din4 => fifo_to_scheduler(i)(3),
             dout => data_out(i)
-        );
-    END GENERATE GEN_INPUT_BUFFER;
+            );
+    END GENERATE GEN_RR_SCHEDULER;
+
+    datao1 <= data_out(0);
+    datao2 <= data_out(1);
+    datao3 <= data_out(2);
+    datao4 <= data_out(3);
+    data_in <= (datai1, datai2, datai3, datai4);
+    wr <= (wr1, wr2, wr3, wr4);
 END Structural;
