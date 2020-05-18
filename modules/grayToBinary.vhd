@@ -2,24 +2,16 @@ LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
 ENTITY grayToBinary IS
-    PORT ( 
-	clk, rst, en: IN STD_LOGIC;
-        g : inout STD_LOGIC_VECTOR (3 downto 0);
-        b : out STD_LOGIC_VECTOR (3 downto 0));
+    PORT (
+        gray_in : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+        bin_out : OUT STD_LOGIC_VECTOR (3 DOWNTO 0));
 END grayToBinary;
 
 ARCHITECTURE Behavioral OF grayToBinary IS
-COMPONENT grayCounter IS
-        GENERIC (N : INTEGER := 3);
-        PORT (
-		clk, rst, en : IN STD_LOGIC;
-                count_out : OUT STD_LOGIC_VECTOR (N DOWNTO 0));
-END COMPONENT;
 
-BEGIN  
-    C2: grayCounter GENERIC MAP (3) PORT MAP (clk => clk, rst=> rst, en => en, count_out  => g);
-    b(3)<= g(3);
-    b(2)<= g(3) xor g(2);
-    b(1)<= g(3) xor g(2) xor g(1);
-    b(0)<= g(3) xor g(2) xor g(1) xor g(0);
+BEGIN
+    bin_out(3) <= gray_in(3);
+    bin_out(2) <= gray_in(3) XOR gray_in(2);
+    bin_out(1) <= gray_in(3) XOR gray_in(2) XOR gray_in(1);
+    bin_out(0) <= gray_in(3) XOR gray_in(2) XOR gray_in(1) XOR gray_in(0);
 END behavioral;

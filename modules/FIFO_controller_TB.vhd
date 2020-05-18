@@ -42,6 +42,7 @@ BEGIN
         rdclk <= '1';
         WAIT FOR clk_period/2;
     END PROCESS;
+
     wrclk_process : PROCESS
     BEGIN
         wrclk <= '0';
@@ -49,17 +50,59 @@ BEGIN
         wrclk <= '1';
         WAIT FOR clk_period/2;
     END PROCESS;
+
     stim_proc : PROCESS
     BEGIN
         reset <= '1';
         r_req <= '1';
-        wait for clk_period;
-        Assert read_valid = '0';
+        WAIT FOR clk_period;
+        ASSERT read_valid = '0' AND write_valid = '1'
+        REPORT "testing RESET ON failed" SEVERITY ERROR;
         reset <= '0';
         w_req <= '1';
-        wait for clk_period;
-        Assert wr_ptr = "001";
-        
+        WAIT FOR clk_period;
+        ASSERT wr_ptr = "001"
+        REPORT "attempting to write failed" SEVERITY ERROR;
+
+        w_req <= '0';
+        r_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT wr_ptr = "001" AND rd_ptr = "001"
+        REPORT "attempting to read failed" SEVERITY ERROR;
+
+        w_req <= '0';
+        r_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT read_valid = '0' AND empty = '1'
+        REPORT "attempting to read when FIFO is empty failed" SEVERITY ERROR;
+
+        r_req <= '0';
+        w_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT wr_ptr = "010";
+        w_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT wr_ptr = "011";
+        w_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT wr_ptr = "100";
+        w_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT wr_ptr = "101";
+        w_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT wr_ptr = "110";
+        w_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT wr_ptr = "111";
+        w_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT wr_ptr = "000";
+        w_req <= '1';
+        WAIT FOR clk_period;
+        ASSERT full = '1' AND write_valid = '0'
+        REPORT "attempting to write when FIFO is full failed" SEVERITY ERROR;
+        WAIT;
     END PROCESS;
 
 END;
