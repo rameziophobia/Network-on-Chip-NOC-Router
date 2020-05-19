@@ -26,6 +26,11 @@ ARCHITECTURE Structural OF router IS
     SIGNAL fifo_to_scheduler : ARRAY4x4x8;
     SIGNAL fifo_empty : ARRAY4x4;
     SIGNAL fifo_full : ARRAY4x4;
+    SIGNAL fifo_equal : ARRAY4x4;
+    SIGNAL fifo_wr_en : ARRAY4x4;
+
+    SIGNAL current_fifo_state : std_logic_vector(3 downto 0) := "1000";
+    SIGNAL next_fifo_state : std_logic_vector(3 downto 0) := "0100";
 
 BEGIN
     GEN_INPUT_BUFFER :
@@ -58,21 +63,23 @@ BEGIN
         FOR j IN 0 TO 3 GENERATE -- for each fifo per buffer  
             SIGNAL equal : STD_LOGIC;
             SIGNAL wr_en : STD_LOGIC;
+            SIGNAL rreq : STD_LOGIC;
         BEGIN
             equal <= '1' WHEN (to_integer(signed(input_to_dmux(j)(1 DOWNTO 0))) = i) ELSE
                 '0';
-            wr_en <= wr(j) AND equal AND NOT fifo_full(i)(j);
-            inputBuffer : ENTITY work.fifo_module PORT MAP
+            wr_en <= '1' AND equal AND NOT fifo_full(i)(j) AND wclock;
+            rreq <= "NOT"(fifo_empty(i)(j)) AND current_fifo_state(j);
+            fifo : ENTITY work.module_fifo PORT MAP
                 (
-                rst => rst,
-                rclk => rclock,
+                reset => rst,
                 wclk => wclock,
-                wr_en => wr_en, --wreq
-                wr_data => dmux_to_fifo(j)(i), --datain
-                full => fifo_full(i)(j),
-                rd_en => "NOT"(fifo_empty(i)(j)), -- rreq -- todo check this
-                rd_data => fifo_to_scheduler(i)(j), --dataout
-                empty => fifo_empty(i)(j)
+                rclk => rclock,
+                rreq => rreq, -- todo check this
+                wreq => wr_en,
+                datain => dmux_to_fifo(j)(i),
+                dataout => fifo_to_scheduler(i)(j),
+                empty => fifo_empty(i)(j),
+                full => fifo_full(i)(j)
                 );
         END GENERATE GEN_FIFO_INNER_LOOP;
     END GENERATE GEN_FIFO_OUTER_LOOP;
@@ -89,6 +96,31 @@ BEGIN
             dout => data_out(i)
             );
     END GENERATE GEN_RR_SCHEDULER;
+
+    current_fifo_state_proc : PROCESS (wclock)
+    BEGIN
+        IF rst = '1' THEN
+            current_fifo_state <= "0001";
+        ELSIF falling_edge(wclock) THEN
+            current_fifo_state <= next_fifo_state;
+        END IF;
+    END PROCESS;
+
+    next_fifo_state_proc : PROCESS (current_fifo_state)
+    BEGIN
+        CASE current_fifo_state IS
+            WHEN "1000" =>
+                next_fifo_state <= "0100";
+            WHEN "0100" =>
+                next_fifo_state <= "0010";
+            WHEN "0010" =>
+                next_fifo_state <= "0001";
+            WHEN "0001" =>
+                next_fifo_state <= "1000";
+            WHEN OTHERS =>
+                next_fifo_state <= "1000";
+        END CASE;
+    END PROCESS;
 
     datao1 <= data_out(0);
     datao2 <= data_out(1);
