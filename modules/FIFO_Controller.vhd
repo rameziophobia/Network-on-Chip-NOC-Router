@@ -19,8 +19,8 @@ ENTITY FIFOcontrol IS
 END FIFOcontrol;
 ARCHITECTURE FIFOcontrolarch OF FIFOcontrol IS
 
-  SIGNAL rd_counterToConverter : STD_LOGIC_VECTOR (3 DOWNTO 0);
-  SIGNAL wr_counterToConverter : STD_LOGIC_VECTOR (3 DOWNTO 0);
+  SIGNAL rd_gray : STD_LOGIC_VECTOR (3 DOWNTO 0);
+  SIGNAL wr_gray : STD_LOGIC_VECTOR (3 DOWNTO 0);
   SIGNAL rd_binout : STD_LOGIC_VECTOR (3 DOWNTO 0);
   SIGNAL wr_binout : STD_LOGIC_VECTOR (3 DOWNTO 0);
   SIGNAL read_valid_sig : STD_LOGIC;
@@ -41,46 +41,34 @@ BEGIN
     clk => rdclk,
     rst => reset,
     en => read_valid_sig,
-    count_out => rd_counterToConverter
+    count_out => rd_gray
   );
   gray_cnt_wr : grayCounter PORT MAP(
     clk => wrclk,
     rst => reset,
     en => write_valid_sig,
-    count_out => wr_counterToConverter
+    count_out => wr_gray
   );
   gray_2bin_rd : grayToBinary PORT MAP(
-    gray_in => rd_counterToConverter,
+    gray_in => rd_gray,
     bin_out => rd_binout
   );
   gray_2bin_wr : grayToBinary PORT MAP(
-    gray_in => wr_counterToConverter,
+    gray_in => wr_gray,
     bin_out => wr_binout
   );
 
-  --rst : PROCESS (reset) IS
-  --BEGIN
-  --  empty <= '1';
-  --  full <= '0';
-  --  write_valid <= '1';
-  --  read_valid <= '0';
-  --END PROCESS rst;
-
-  --"empty <= (rd_binout AND wr_binout);"
-  --"full <= (rd_binout AND (wr_binout + "001")) OR (rd_binout="000" and wr_binout ="111");"
-  --read_valid <= r_req AND (NOT empty);
-  --write_valid <= w_req AND (NOT full);
-  shelfle7 : PROCESS (reset, rd_counterToConverter, wr_counterToConverter, r_req, w_req) IS
+  proc : PROCESS (reset, rd_gray, wr_gray, r_req, w_req) IS
   BEGIN
     IF reset = '1' THEN
       empty <= '1';
       write_valid_sig <= '1';
-    ELSIF (rd_counterToConverter = wr_counterToConverter) THEN
+    ELSIF (rd_gray = wr_gray) THEN
       empty <= '1';
       read_valid_sig <= '0';
     ELSE
       empty <= '0';
-      IF (r_req = '1') THEN
+      IF  (r_req = '1') THEN
         read_valid_sig <= '1';
       ELSE
         read_valid_sig <= '0';
@@ -90,8 +78,7 @@ BEGIN
     IF reset = '1' THEN
       full <= '0';
       read_valid_sig <= '0';
-    ELSIF ((NOT (wr_counterToConverter(3 DOWNTO 2)) = rd_counterToConverter(3 DOWNTO 2)) AND (wr_counterToConverter(1 DOWNTO 0) = rd_counterToConverter(1 DOWNTO 0))) THEN
-      --IF ((to_integer(signed(rd_binout(2:0))) = to_integer(signed(wr_binout(2:0))) + 1)) OR (rd_binout(2:0) = "000" AND wr_binout(2:0) = "111") THEN
+    ELSIF ((NOT (wr_gray(3 DOWNTO 2)) = rd_gray(3 DOWNTO 2)) AND (wr_gray(1 DOWNTO 0) = rd_gray(1 DOWNTO 0))) THEN
       full <= '1';
       write_valid_sig <= '0';
     ELSE
@@ -102,7 +89,7 @@ BEGIN
         write_valid_sig <= '0';
       END IF;
     END IF;
-  END PROCESS shelfle7;
+  END PROCESS proc;
 
   write_valid <= write_valid_sig;
   read_valid <= read_valid_sig;

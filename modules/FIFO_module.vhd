@@ -25,7 +25,7 @@ ARCHITECTURE module_FIFO_Arch OF module_fifo IS
   SIGNAL temp_read_ptr_int : INTEGER;
 BEGIN
 
-  fuckface : ENTITY work.FIFOcontrol PORT MAP(
+  fifoController : ENTITY work.FIFOcontrol PORT MAP(
     reset => reset,
     wrclk => wclk,
     rdclk => rclk,
