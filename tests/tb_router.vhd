@@ -58,23 +58,73 @@ BEGIN
         datai3 <= "00110000";
         datai4 <= "01000000";
         WAIT FOR clk_period;
-        datai1 <= "00010000";
-        wr2 <= '0';
-        wr3 <= '0';
-        wr4 <= '0';
-        WAIT FOR clk_period * 8;
-        datai1 <= "11110000";
-        WAIT FOR clk_period;
         wr1 <= '0';
         wr2 <= '0';
         wr3 <= '0';
         wr4 <= '0';
         WAIT FOR clk_period;
-        WAIT FOR clk_period;
-        WAIT FOR clk_period;
+        ASSERT datao2 = "00000001"
+        REPORT "Test case 1a failed"
+            SEVERITY Error;
 
-        -- ASSERT full = '0' AND empty = '1'
-        -- REPORT "testing RESET ON failed" SEVERITY ERROR;
+        WAIT FOR clk_period;
+        ASSERT datao1 = "00000100"
+        REPORT "Test case 1b failed"
+            SEVERITY Error;
+
+        WAIT FOR clk_period;
+        ASSERT datao4 = "00000011"
+        REPORT "Test case 1c failed"
+            SEVERITY Error;
+        ASSERT datao1 = "00100000"
+        REPORT "Test case 2a failed"
+            SEVERITY Error;
+
+        WAIT FOR clk_period;
+        ASSERT datao3 = "00000010"
+        REPORT "Test case 1d failed"
+            SEVERITY Error;
+        ASSERT datao1 = "00110000"
+        REPORT "Test case 2b failed"
+            SEVERITY Error;
+
+        WAIT FOR clk_period;
+        ASSERT datao1 = "01000000"
+        REPORT "Test case 2c failed"
+            SEVERITY Error;
+
+        WAIT FOR clk_period;
+        ASSERT datao1 = "00010000"
+        REPORT "Test case 2d failed"
+            SEVERITY Error;
+
+        wr2 <= '1';
+        datai2 <= "10100001";
+        WAIT FOR clk_period * 10;
+        datai2 <= "11110001";
+        WAIT FOR clk_period;
+        wr2 <= '0';
+
+        WAIT FOR clk_period * 30;
+        ASSERT datao2 = "10100001"
+        REPORT "Test case 3 failed"
+            SEVERITY Error;
+
+        datai4 <= "11110011";
+        wr4 <= '1';
+        WAIT FOR clk_period * 2;
+        rst <= '1';
+        wr4 <= '0';
+        WAIT FOR clk_period;
+        datai4 <= "11010011";
+        wr4 <= '1';
+        rst <= '0';
+        WAIT FOR clk_period;
+        wr4 <= '0';
+        WAIT FOR clk_period * 2;
+        ASSERT datao4 = "11010011"
+        REPORT "Test case 4 failed"
+            SEVERITY Error;
 
         WAIT;
     END PROCESS;
