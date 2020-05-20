@@ -22,7 +22,7 @@ ARCHITECTURE behavior OF tb_genericRegister IS
 
     SIGNAL temp : std_logic_vector(N DOWNTO 0);
 
-    CONSTANT WAIT_TIME: Time:= 30 ns;
+    CONSTANT WAIT_TIME : TIME := 30 ns;
 BEGIN
 
     Dut : genericRegister
@@ -31,7 +31,7 @@ BEGIN
 
     p1 : PROCESS
     BEGIN
-    -- Init Clock
+        -- Init Clock
         clk <= '0';
         WAIT FOR WAIT_TIME;
 
@@ -39,7 +39,7 @@ BEGIN
         data_in <= "11111111";
         rst <= '0';
         clk_en <= '1';
-        clk<='1';
+        clk <= '1';
         WAIT FOR WAIT_TIME;
         ASSERT data_out = "11111111"
         REPORT "ERROR in test 1" SEVERITY error;
@@ -51,7 +51,7 @@ BEGIN
         data_in <= "10101010";
         rst <= '0';
         clk_en <= '0';
-        clk<='1';
+        clk <= '1';
         WAIT FOR WAIT_TIME;
         ASSERT data_out = temp
         REPORT "ERROR in test 1" SEVERITY error;
@@ -62,7 +62,7 @@ BEGIN
         data_in <= "11111111";
         rst <= '1';
         clk_en <= '0';
-        clk<='1';
+        clk <= '1';
         WAIT FOR WAIT_TIME;
         ASSERT data_out = "00000000"
         REPORT "ERROR in test 3" SEVERITY error;
@@ -71,14 +71,17 @@ BEGIN
 
         -- Test 4
         -- Change Current Output
-        data_in <= "11111111"; rst <= '0'; clk_en <= '1'; clk<='1';
+        data_in <= "11111111";
+        rst <= '0';
+        clk_en <= '1';
+        clk <= '1';
         WAIT FOR WAIT_TIME;
         clk <= '0';
         WAIT FOR WAIT_TIME;
         -- Try Reset
         rst <= '1';
         clk_en <= '1';
-        clk<='1';
+        clk <= '1';
         WAIT FOR WAIT_TIME;
         ASSERT data_out = "00000000"
         REPORT "ERROR in test 4" SEVERITY error;
@@ -86,6 +89,6 @@ BEGIN
         WAIT FOR WAIT_TIME;
 
         WAIT;
-        END PROCESS;
+    END PROCESS;
 
 END;

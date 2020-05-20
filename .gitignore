@@ -91,3 +91,5 @@ _ngo/
 _xmsgs/
 
 !doc/media/*.*
+
+noc_router.mpf
