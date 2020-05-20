@@ -42,27 +42,37 @@ BEGIN
     stim_proc : PROCESS
     BEGIN
         rst <= '1';
-        wait for clk_period;
-        -- datai1 <= "00000000";
-        -- datai2 <= "00000011";
-        -- datai3 <= "00000010";
-        -- datai4 <= "00000001";
-        -- rst <= '1';
+        WAIT FOR clk_period;
+        datai1 <= "00000100";
+        datai2 <= "00000011";
+        datai3 <= "00000010";
+        datai4 <= "00000001";
         rst <= '0';
-        -- wr1 <= '1';
-        WAIT FOR clk_period;
-        datai2 <= "00000100";
-        -- wr2 <= '1';
-        -- wr3 <= '1';
-        -- wr4 <= '1';
-        wr1 <= '0';
+        wr1 <= '1';
         wr2 <= '1';
+        wr3 <= '1';
+        wr4 <= '1';
         WAIT FOR clk_period;
+        datai1 <= "00010000";
+        datai2 <= "00100000";
+        datai3 <= "00110000";
+        datai4 <= "01000000";
+        WAIT FOR clk_period;
+        datai1 <= "00010000";
         wr2 <= '0';
+        wr3 <= '0';
+        wr4 <= '0';
+        WAIT FOR clk_period * 8;
+        datai1 <= "11110000";
+        WAIT FOR clk_period;
+        wr1 <= '0';
+        wr2 <= '0';
+        wr3 <= '0';
+        wr4 <= '0';
         WAIT FOR clk_period;
         WAIT FOR clk_period;
         WAIT FOR clk_period;
-        
+
         -- ASSERT full = '0' AND empty = '1'
         -- REPORT "testing RESET ON failed" SEVERITY ERROR;
 
